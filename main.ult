@@ -1,0 +1,16 @@
+func main(args) {
+    # this is a comment 
+    let x := 123;
+    let arr := [1, 2, 3];
+    let dec := 1.233;
+    # let n = 2;
+    println(567);
+
+    let a := 'a';
+    ...
+
+    for (let i := 0; i < 10 || i < -20; i += 1) {
+        i -= 2;
+        println(i);
+    }
+}
