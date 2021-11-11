@@ -1,5 +1,6 @@
 use super::token::*;
 use std::fmt::{ Display, Result, Formatter };
+use std::error::Error;
 use TokenError::*;
 
 #[derive(Debug)]
@@ -28,3 +29,5 @@ impl Display for TokenError {
         }
     }
 }
+
+impl Error for TokenError {}
