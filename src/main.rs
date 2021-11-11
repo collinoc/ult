@@ -1,24 +1,25 @@
 mod lexer;
 use lexer::lexer::Lexer;
+use std::error::Error;
+use std::env;
 
-fn main() {
-    let args = std::env::args().collect::<Vec<String>>();
+fn main() -> Result<(), Box<dyn Error>> {
+    let args = env::args().collect::<Vec<String>>();
     let filepath = args.get(1);
 
     let mut lexer = Lexer::new(filepath);
 
     let start = std::time::Instant::now();
 
-    match lexer.lex() {
-        Ok(_) => (),
-        Err(e) => println!("{}", e),
-    }
+    lexer.lex()?;
 
     let end = std::time::Instant::now();
 
-    // for token in lexer.tokens() {
-    //     println!("{:?}", token);
-    // }
+    for token in lexer.tokens() {
+        println!("{:?}", token);
+    }
 
     println!("Done in {:?}", (end - start));
+
+    Ok(())
 }
