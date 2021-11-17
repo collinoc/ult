@@ -1,4 +1,4 @@
 pub mod lexer;
 pub mod error;
-mod token;
+pub mod token;
 mod source;
