@@ -2,6 +2,8 @@ use super::token::*;
 use super::error::*;
 use super::source::*;
 
+type LinePos = (i32, i32);
+
 pub struct Lexer {
     tokens: Vec<Token>,
     source: String,
@@ -46,7 +48,7 @@ impl<'l> Lexer {
                         string.push(src.next()?);
                     }
 
-                    tokens.push(match_keyword(string));
+                    tokens.push(match_keyword(&string));
                 },
 
                 d if d.is_ascii_digit() => {
@@ -90,14 +92,14 @@ impl<'l> Lexer {
                 '%' => tokens.push(Token::Modulo),
                 '.' => tokens.push(Token::Dot),
                 ',' => tokens.push(Token::Comma),
-                '{' => tokens.push(Token::LCurly),
-                '}' => tokens.push(Token::RCurly),
-                '(' => tokens.push(Token::LParen),
-                ')' => tokens.push(Token::RParen),
-                '[' => tokens.push(Token::LSquare),
-                ']' => tokens.push(Token::RSquare),
+                '{' => tokens.push(Token::LeftBrace),
+                '}' => tokens.push(Token::RightBrace),
+                '(' => tokens.push(Token::LeftParenthesis),
+                ')' => tokens.push(Token::RightParenthesis),
+                '[' => tokens.push(Token::LeftBracket),
+                ']' => tokens.push(Token::RightBracket),
                 '^' => tokens.push(Token::Xor),
-                '~' => tokens.push(Token::Negate),
+                '~' => tokens.push(Token::BinaryNegate),
 
                 '=' => {
                     src.expect('=')?;
@@ -128,7 +130,7 @@ impl<'l> Lexer {
                 '!' => {
                     match src.peek() {
                         '=' => { tokens.push(Token::NotEquals); src.next()?; },
-                        _ => tokens.push(Token::Bang)
+                        _ => tokens.push(Token::Not)
                     }
                 },
 
@@ -155,8 +157,8 @@ impl<'l> Lexer {
 
                 '|' => {
                     match src.peek() {
-                        '|' => { tokens.push(Token::LogicalOr); src.next()?; },
-                        _ => tokens.push(Token::BinaryOr)
+                        '|' => { tokens.push(Token::BinaryOr); src.next()?; },
+                        _ => tokens.push(Token::LogicalOr)
                     }
                 }
 
@@ -177,28 +179,28 @@ fn is_id_cont(c: char) -> bool {
     is_id_start(c) || c.is_ascii_digit()
 }
 
-fn match_keyword(word: String) -> Token {
+fn match_keyword(word: &str) -> Token {
     use Token::*;
 
-    match word.as_str() {
-        "let" => Let,         
-        "func" => Func,        
-        "return" => Return,      
-        "if" => If,          
-        "else" => Else,        
-        "while" => While,       
-        "for" => For,         
-        "break" => Break,       
+    match word {
+        "let" => Let,
+        "func" => Func,
+        "return" => Return,
+        "if" => If,
+        "else" => Else,
+        "while" => While,
+        "for" => For,
+        "break" => Break,
         "continue" => Continue,
-        "none" => None,
+        "null" => Null,
         "true" => BooleanLiteral(true),
         "false" => BooleanLiteral(false),
-        
-        _ => Identifier(word)
+
+        _ => Identifier(word.into())
     }
 }
 
-fn parse_num(num: String, lp: (i32, i32)) -> Result<Token, TokenError> {
+fn parse_num(num: String, lp: LinePos) -> Result<Token, TokenError> {
     if num.contains('.') {
         match num.parse::<f64>() {
             Ok(n) => Ok(Token::DecimalLiteral(n)),
@@ -206,6 +208,6 @@ fn parse_num(num: String, lp: (i32, i32)) -> Result<Token, TokenError> {
         }
     } 
     else {
-        Ok(Token::NumberLiteral(num.parse::<i64>().unwrap()))
+        Ok(Token::IntegerLiteral(num.parse::<i64>().unwrap()))
     }
 }
