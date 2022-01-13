@@ -1,16 +1,10 @@
+# Names:
+- Equil
+
 # TODO:
 Planned features and operators.
 ## Types
 ___
-- Short
-- Int
-- Long
-- Float
-- Double
-- String
-- Character
-- Boolean
-- USize
 - Byte
 - Unsigned
 
@@ -33,6 +27,7 @@ ___
 - As 
 - In
 - Is
+- To
 
 - Switch
 - Case
@@ -45,7 +40,6 @@ ___
 
 ## Symbols
 ___
-### Ambiguous symbols
 - Question       `?`
 - Null Coalesce   `??`
 - Optional       `?.`
@@ -55,18 +49,19 @@ ___
 - Exponent       `**`
 - Exponent Equals `**=`
 - Divide Equals   `/=`
-- Arrow          `=>` 
-- Shift Left      `<<`
-- Shift Right     `>>`
-
-### Non-ambiguous symbols
-- At             `@`
+- Arrow          `=>`
 
 ## Features
 - Tuples
 - Sets
-- Generics
+- Structs
+- Enums
 - Ternary statements
 - Array and tuple destructuring
 - Assert
-- Error catching
+- Exceptions/Traps
+- Anonymous Functions and Structs
+- Macros
+- Try/Catch
+- For each loops
+- List comprehensions
