@@ -1,6 +1,8 @@
 use super::error::*;
-
 use std::{ iter, vec };
+
+pub const EOF: char = '\0';
+
 /// A source code iterator. \
 /// Code `position` and `line` are handled internally
 pub struct Source {
@@ -11,7 +13,7 @@ pub struct Source {
 
 impl<'s> Source {
     /// Creates a new source code iterator from a string
-    pub fn new(src: &'s String) -> Source {
+    pub fn new(src: &'s str) -> Source {
         Source {
             source: src.chars()
                 .collect::<Vec<char>>()
@@ -56,7 +58,7 @@ impl<'s> Source {
     }
 
     /// Checks if the source iterator has more characters left in it
-    pub fn has_next(&self) -> bool {
+    pub fn has_next(&mut self) -> bool {
         self.source.size_hint().0 > 0
     }
 

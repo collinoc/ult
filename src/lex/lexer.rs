@@ -2,7 +2,7 @@ use super::token::*;
 use super::error::*;
 use super::source::*;
 
-type LinePos = (i32, i32);
+type LnPos = (i32, i32);
 
 pub struct Lexer {
     tokens: Vec<Token>,
@@ -34,7 +34,7 @@ impl<'l> Lexer {
                 '\0' => break,
 
                 '#' => {
-                    while src.peek() != '\n' {
+                    while src.peek() != '\n' && src.peek() != EOF {
                         src.next()?;
                     }
                 },
@@ -55,8 +55,12 @@ impl<'l> Lexer {
                     let mut num = String::from(d);
 
                     while src.peek().is_ascii_digit() ||
-                        src.peek() == '.' {
-                            num.push(src.next()?);
+                        src.peek() == '.' || 
+                        src.peek() == '_' {
+                            match src.peek() {
+                                '_' => { src.next()?; },
+                                _ => num.push(src.next()?),
+                            }
                     }
 
                     tokens.push(parse_num(num, src.lp())?);
@@ -87,7 +91,6 @@ impl<'l> Lexer {
                 }
 
                 ';' => tokens.push(Token::Semicolon),
-                '*' => tokens.push(Token::Multiply),
                 '/' => tokens.push(Token::Divide),
                 '%' => tokens.push(Token::Modulo),
                 '.' => tokens.push(Token::Dot),
@@ -100,17 +103,17 @@ impl<'l> Lexer {
                 ']' => tokens.push(Token::RightBracket),
                 '^' => tokens.push(Token::Xor),
                 '~' => tokens.push(Token::BinaryNegate),
-
+                
                 '=' => {
                     src.expect('=')?;
                     tokens.push(Token::Equals);
                 },
-
+                
                 ':' => {
                     src.expect('=')?;
                     tokens.push(Token::Assign);
                 },
-
+                
                 '+' => {
                     match src.peek() {
                         '+' => { tokens.push(Token::Increment); src.next()?; },
@@ -118,12 +121,19 @@ impl<'l> Lexer {
                         _ => tokens.push(Token::Plus)
                     }
                 },
-
+                
                 '-' => {
                     match src.peek() {
                         '-' => { tokens.push(Token::Decrement); src.next()?; },
                         '=' => { tokens.push(Token::MinusEquals); src.next()?; },
                         _ => tokens.push(Token::Minus)
+                    }
+                },
+                
+                '*' => {
+                    match src.peek() {
+                        '*' => { tokens.push(Token::Exponentiate); src.next()?; },
+                        _ => tokens.push(Token::Multiply)
                     }
                 },
 
@@ -137,6 +147,7 @@ impl<'l> Lexer {
                 '>' => {
                     match src.peek() {
                         '=' => { tokens.push(Token::GreaterEquals); src.next()?; },
+                        '>' => { tokens.push(Token::ShiftRight); src.next()?; },
                         _ => tokens.push(Token::GreaterThan)
                     }
                 },
@@ -144,6 +155,7 @@ impl<'l> Lexer {
                 '<' => {
                     match src.peek() {
                         '=' => { tokens.push(Token::LessEquals); src.next()?; },
+                        '<' => { tokens.push(Token::ShiftLeft); src.next()?; },
                         _ => tokens.push(Token::LessThan) 
                     }
                 },
@@ -157,14 +169,16 @@ impl<'l> Lexer {
 
                 '|' => {
                     match src.peek() {
-                        '|' => { tokens.push(Token::BinaryOr); src.next()?; },
-                        _ => tokens.push(Token::LogicalOr)
+                        '|' => { tokens.push(Token::LogicalOr); src.next()?; },
+                        _ => tokens.push(Token::BinaryOr)
                     }
                 }
 
                 u => return Err(TokenError::Unknown(u, src.lp())),
             }
         }
+
+        tokens.push(Token::EOF);
 
         self.tokens = tokens.clone();
         Ok(tokens)
@@ -200,7 +214,7 @@ fn match_keyword(word: &str) -> Token {
     }
 }
 
-fn parse_num(num: String, lp: LinePos) -> Result<Token, TokenError> {
+fn parse_num(num: String, lp: LnPos) -> Result<Token, TokenError> {
     if num.contains('.') {
         match num.parse::<f64>() {
             Ok(n) => Ok(Token::DecimalLiteral(n)),
