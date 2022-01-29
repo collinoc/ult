@@ -1,2 +1,2 @@
 # Ult
-Designed to be powerful and modern.
+Designed to be fast and modern.
